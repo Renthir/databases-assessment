@@ -227,9 +227,60 @@ module.exports = {
             ('Yemen'),
             ('Zambia'),
             ('Zimbabwe');
+
+            INSERT INTO cities(name, rating, country_id)
+            VALUES ('Amsterdam', 4, 123),
+            ('Bath', 5, 186),
+            ('New York', 3, 187);
+
         `).then(() => {
             console.log('DB seeded!')
             res.sendStatus(200)
         }).catch(err => console.log('error seeding DB', err))
+    },
+
+    getCountries: (req, res) => {
+        sequelize.query(`
+            SELECT * FROM countries;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log('error'))
+    },
+
+    createCity: (req, res) => {
+        const {countryId, name, rating} = req.body
+
+        sequelize.query(`
+            INSERT INTO cities(name, rating, country_id)
+            VALUES ('${name}', ${rating}, ${countryId});
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+    },
+
+    getCities: (req, res) => {
+        sequelize.query(`
+            SELECT city_id,
+            cities.name as city,
+            rating,
+            cities.country_id, 
+            countries.name as country
+            FROM cities
+            JOIN countries 
+            ON cities.country_id = countries.country_id
+            ORDER BY rating DESC;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+    },
+
+    deleteCity: (req, res) => {
+        let {id} = req.params
+        sequelize.query(`
+            DELETE
+            FROM cities
+            WHERE city_id = ${id}
+        `).then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
     }
 }
